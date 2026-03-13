@@ -1,0 +1,77 @@
+{
+  "email": "teacher@example.com",
+  "password": "password123",
+  "name": "John Teacher",
+  "role": "teacher"
+}
+
+{
+    "email": "vijitha@gmail.com",
+    "password": "123456",
+    "name": "Vijitha",
+    "role": "student"
+}
+
+
+git commit -m "Normal Implementation"
+PS E:\smartClassroom3> git commit -m "Normal Implementation" 
+[master (root-commit) 72d2887] Normal Implementation
+ 57 files changed, 27409 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 client/package-lock.json
+ create mode 100644 client/package.json
+ create mode 100644 client/public/favicon.ico
+ create mode 100644 client/public/index.html
+ create mode 100644 client/src/App.js
+ create mode 100644 client/src/assets/logo.svg
+ create mode 100644 client/src/components/Assignments/AssignmentList.js
+ create mode 100644 client/src/components/Assignments/CreateAssignment.js
+ create mode 100644 client/src/components/Assignments/GradeAssignment.js
+ create mode 100644 client/src/components/Assignments/SubmitAssignment.js
+ create mode 100644 client/src/components/Attendance/AttendanceView.js
+ create mode 100644 client/src/components/Attendance/MarkAttendance.js
+ create mode 100644 client/src/components/Auth/Login.js
+ create mode 100644 client/src/components/Auth/PrivateRoute.js
+ create mode 100644 client/src/components/Auth/Register.js
+ create mode 100644 client/src/components/Classes/ClassCard.js
+ create mode 100644 client/src/components/Classes/ClassDetails.js
+ create mode 100644 client/src/components/Classes/ClassList.js
+ create mode 100644 client/src/components/Classes/CreateClass.js
+ create mode 100644 client/src/components/Dashboard/StudentDashboard.js
+ create mode 100644 client/src/components/Dashboard/TeacherDashboard.js
+ create mode 100644 client/src/components/Grades/AddGrade.js
+ create mode 100644 client/src/components/Grades/GradeView.js
+ create mode 100644 client/src/components/Layout/Footer.js
+ create mode 100644 client/src/components/Layout/Navbar.js
+ create mode 100644 client/src/components/Layout/Sidebar.js
+ create mode 100644 client/src/components/NotFound.js
+ create mode 100644 client/src/contexts/AuthContext.js
+ create mode 100644 client/src/index.css
+ create mode 100644 client/src/index.js
+ create mode 100644 client/src/services/api.js
+ create mode 100644 client/src/styles/theme.css
+ create mode 100644 client/src/utils/constants.js
+ create mode 100644 server/config/firebase.js
+ create mode 100644 server/controllers/assignmentController.js
+ create mode 100644 server/controllers/attendanceController.js
+ create mode 100644 server/controllers/authController.js
+ create mode 100644 server/controllers/classController.js
+ create mode 100644 server/controllers/gradeController.js
+ create mode 100644 server/middleware/auth.js
+ create mode 100644 server/models/Assignment.js
+ create mode 100644 server/models/Attendance.js
+ create mode 100644 server/models/Class.js
+ create mode 100644 server/models/Grade.js
+ create mode 100644 server/models/User.js
+ create mode 100644 server/package-lock.json
+ create mode 100644 server/package.json
+ create mode 100644 server/routes/assignmentRoutes.js
+ create mode 100644 server/routes/attendanceRoutes.js
+ create mode 100644 server/routes/authRoutes.js
+ create mode 100644 server/routes/classRoutes.js
+ create mode 100644 server/routes/dashboardRoutes.js
+ create mode 100644 server/routes/gradeRoutes.js
+ create mode 100644 server/routes/userRoutes.js
+ create mode 100644 server/server.js
+ create mode 100644 server/serviceAccountKey.json
+
