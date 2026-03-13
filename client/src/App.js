@@ -20,6 +20,13 @@ import SubmitAssignment from './components/Assignments/SubmitAssignment';
 import GradeAssignment from './components/Assignments/GradeAssignment';
 import AddGrade from './components/Grades/AddGrade';
 import NotFound from './components/NotFound';
+import TeacherSchedule from './components/Schedule/TeacherSchedule';
+import DiscussionList from './components/Discussions/DiscussionList';
+import ThreadDetail from './components/Discussions/ThreadDetail';
+import NotificationPrompt from './components/Notifications/NotificationPrompt';
+import Toast from './components/Notifications/Toast';
+import UserProfile from './components/Profile/UserProfile';
+import JoinClass from './components/Classes/JoinClass';
 
 function App() {
   return (
@@ -27,6 +34,8 @@ function App() {
       <AuthProvider>
         <div className="app">
           <Navbar />
+          <NotificationPrompt />
+<Toast />
           <main className="main-content">
             <Routes>
               {/* Public Routes */}
@@ -43,7 +52,20 @@ function App() {
                   )}
                 </PrivateRoute>
               } />
+
+              <Route path="/join-class/:classId" element={
+  <PrivateRoute> {/* No role restriction - component will handle */}
+    <JoinClass />
+  </PrivateRoute>
+} />
+
               
+              <Route path="/profile" element={
+  <PrivateRoute>
+    <UserProfile />
+  </PrivateRoute>
+} />
+
               <Route path="/classes" element={
                 <PrivateRoute>
                   <ClassList />
@@ -55,6 +77,17 @@ function App() {
                   <ClassDetails />
                 </PrivateRoute>
               } />
+              <Route path="/discussions/:classId" element={
+  <PrivateRoute>
+    <DiscussionList />
+  </PrivateRoute>
+} />
+
+<Route path="/discussions/:classId/:threadId" element={
+  <PrivateRoute>
+    <ThreadDetail />
+  </PrivateRoute>
+} />
               
               <Route path="/classes/create" element={
                 <PrivateRoute allowedRoles={['teacher']}>
@@ -67,6 +100,12 @@ function App() {
                   <AttendanceView />
                 </PrivateRoute>
               } />
+
+              <Route path="/schedule" element={
+  <PrivateRoute allowedRoles={['teacher']}>
+    <TeacherSchedule />
+  </PrivateRoute>
+} />
               
               <Route path="/attendance/mark/:classId" element={
                 <PrivateRoute allowedRoles={['teacher']}>

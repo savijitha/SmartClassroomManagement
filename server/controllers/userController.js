@@ -1,79 +1,8 @@
-const express = require('express');
-const { authenticate, authorizeTeacher } = require('../middleware/auth');
 const User = require('../models/User');
 const { db } = require('../config/firebase');
-const router = express.Router();
-
-// ==================== EXISTING ROUTES ====================
-
-// Get user by email (teachers only) - for enrollment
-router.get('/by-email', authenticate, authorizeTeacher, async (req, res) => {
-  try {
-    const { email } = req.query;
-    
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
-    }
-    
-    const user = await User.findByEmail(email);
-    
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    
-    // Only return student users for enrollment
-    if (user.role !== 'student') {
-      return res.status(400).json({ error: 'Email belongs to a teacher, not a student' });
-    }
-    
-    res.json({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role
-    });
-  } catch (error) {
-    console.error('Find user error:', error);
-    res.status(500).json({ error: 'Failed to find user' });
-  }
-});
-
-// Alternative: Get user by email using query parameter
-router.get('/', authenticate, authorizeTeacher, async (req, res) => {
-  try {
-    const { email } = req.query;
-    
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
-    }
-    
-    const user = await User.findByEmail(email);
-    
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    
-    // Only return student users for enrollment
-    if (user.role !== 'student') {
-      return res.status(400).json({ error: 'Email belongs to a teacher, not a student' });
-    }
-    
-    res.json({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role
-    });
-  } catch (error) {
-    console.error('Find user error:', error);
-    res.status(500).json({ error: 'Failed to find user' });
-  }
-});
-
-// ==================== NEW PROFILE SETTINGS ROUTES ====================
 
 // Get user settings
-router.get('/settings', authenticate, async (req, res) => {
+const getUserSettings = async (req, res) => {
   try {
     const userId = req.user.id;
     
@@ -119,10 +48,10 @@ router.get('/settings', authenticate, async (req, res) => {
     console.error('Get user settings error:', error);
     res.status(500).json({ error: 'Failed to fetch user settings' });
   }
-});
+};
 
 // Update user settings
-router.put('/settings', authenticate, async (req, res) => {
+const updateUserSettings = async (req, res) => {
   try {
     const userId = req.user.id;
     const { notifications, privacy, profile } = req.body;
@@ -140,9 +69,6 @@ router.put('/settings', authenticate, async (req, res) => {
       await db.ref(`users/${userId}`).update({
         name: profile.name
       });
-      
-      // Update the user object in the session (optional)
-      req.user.name = profile.name;
     }
 
     res.json({ 
@@ -153,22 +79,13 @@ router.put('/settings', authenticate, async (req, res) => {
     console.error('Update user settings error:', error);
     res.status(500).json({ error: 'Failed to update user settings' });
   }
-});
+};
 
 // Change password
-router.post('/change-password', authenticate, async (req, res) => {
+const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
     const userId = req.user.id;
-
-    // Validate input
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({ error: 'Current password and new password are required' });
-    }
-
-    if (newPassword.length < 6) {
-      return res.status(400).json({ error: 'New password must be at least 6 characters' });
-    }
 
     // Get user
     const user = await User.findById(userId);
@@ -196,19 +113,15 @@ router.post('/change-password', authenticate, async (req, res) => {
     console.error('Change password error:', error);
     res.status(500).json({ error: 'Failed to change password' });
   }
-});
+};
 
-// Upload profile picture (base64)
-router.post('/profile-picture', authenticate, async (req, res) => {
+// Upload profile picture
+const uploadProfilePicture = async (req, res) => {
   try {
     const userId = req.user.id;
     const { imageData } = req.body;
 
-    if (!imageData) {
-      return res.status(400).json({ error: 'Image data is required' });
-    }
-
-    // Store base64 image in Firebase
+    // Store base64 image in Firebase (for free tier, we'll use base64)
     await db.ref(`userSettings/${userId}/profile`).update({
       profilePicture: imageData
     });
@@ -222,17 +135,13 @@ router.post('/profile-picture', authenticate, async (req, res) => {
     console.error('Upload profile picture error:', error);
     res.status(500).json({ error: 'Failed to upload profile picture' });
   }
-});
+};
 
 // Delete account
-router.delete('/account', authenticate, async (req, res) => {
+const deleteAccount = async (req, res) => {
   try {
     const userId = req.user.id;
     const { password } = req.body;
-
-    if (!password) {
-      return res.status(400).json({ error: 'Password is required' });
-    }
 
     // Verify password
     const user = await User.findById(userId);
@@ -247,30 +156,14 @@ router.delete('/account', authenticate, async (req, res) => {
     const deletions = [
       db.ref(`users/${userId}`).remove(),
       db.ref(`userSettings/${userId}`).remove(),
-      // Delete user's notifications
-      db.ref('notifications').orderByChild('userId').equalTo(userId).once('value')
+      db.ref(`notifications`).orderByChild('userId').equalTo(userId).once('value')
         .then(snapshot => {
           const updates = {};
           snapshot.forEach(child => {
             updates[child.key] = null;
           });
           return db.ref('notifications').update(updates);
-        }),
-      // Remove user from classes
-      db.ref('classes').once('value').then(snapshot => {
-        const updates = {};
-        snapshot.forEach(classSnapshot => {
-          const classData = classSnapshot.val();
-          if (classData.students && classData.students.includes(userId)) {
-            const updatedStudents = classData.students.filter(id => id !== userId);
-            updates[`classes/${classSnapshot.key}/students`] = updatedStudents;
-          }
-          if (classData.teacherId === userId) {
-            updates[`classes/${classSnapshot.key}/teacherId`] = null;
-          }
-        });
-        return db.ref().update(updates);
-      })
+        })
     ];
 
     await Promise.all(deletions);
@@ -280,6 +173,12 @@ router.delete('/account', authenticate, async (req, res) => {
     console.error('Delete account error:', error);
     res.status(500).json({ error: 'Failed to delete account' });
   }
-});
+};
 
-module.exports = router;
+module.exports = {
+  getUserSettings,
+  updateUserSettings,
+  changePassword,
+  uploadProfilePicture,
+  deleteAccount
+};

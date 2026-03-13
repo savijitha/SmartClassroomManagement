@@ -61,28 +61,42 @@ const MarkAttendance = () => {
   };
 
   const handleSubmit = async () => {
-    setSaving(true);
-    setError('');
+  setSaving(true);
+  setError('');
+  
+  try {
+    // Format records properly
+    const records = Object.entries(attendance).map(([studentId, status]) => ({
+      studentId,
+      status
+    }));
+
+    console.log('Submitting attendance:', { 
+      classId, 
+      date: selectedDate, 
+      records 
+    });
+
+    const response = await api.post('/attendance/mark', {
+      classId,
+      date: selectedDate,
+      records
+    });
+
+    console.log('Response:', response.data);
     
-    try {
-      const records = Object.entries(attendance).map(([studentId, status]) => ({
-        studentId,
-        status
-      }));
-
-      await api.post('/attendance/mark', {
-        classId,
-        date: selectedDate,
-        records
-      });
-
-      navigate(`/attendance?class=${classId}&date=${selectedDate}`);
-    } catch (error) {
-      setError(error.response?.data?.error || 'Failed to mark attendance');
-    } finally {
-      setSaving(false);
-    }
-  };
+    // Show success message
+    alert('Attendance marked successfully!');
+    
+    // Navigate back to attendance view
+    navigate(`/attendance?class=${classId}&date=${selectedDate}`);
+  } catch (error) {
+    console.error('Failed to mark attendance:', error);
+    setError(error.response?.data?.error || 'Failed to mark attendance');
+  } finally {
+    setSaving(false);
+  }
+};
 
   if (loading) {
     return (

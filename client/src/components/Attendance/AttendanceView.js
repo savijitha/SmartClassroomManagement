@@ -42,19 +42,29 @@ const AttendanceView = () => {
   const fetchAttendance = async () => {
     setLoading(true);
     try {
+      console.log('Fetching attendance for:', { classId: selectedClass, date: selectedDate });
+      
       const response = await api.get(`/attendance/class/${selectedClass}/date/${selectedDate}`);
+      console.log('Attendance data received:', response.data);
+      
       setAttendance(response.data);
       
-      // Calculate stats
+      // Calculate stats from the actual attendance data
       const stats = response.data.reduce((acc, record) => {
-        acc[record.status] = (acc[record.status] || 0) + 1;
+        if (record.status === 'present') acc.present += 1;
+        else if (record.status === 'absent') acc.absent += 1;
+        else if (record.status === 'late') acc.late += 1;
         acc.total += 1;
         return acc;
       }, { present: 0, absent: 0, late: 0, total: 0 });
       
+      console.log('Calculated stats:', stats);
       setStats(stats);
+      
     } catch (error) {
       console.error('Failed to fetch attendance:', error);
+      setAttendance([]);
+      setStats({ present: 0, absent: 0, late: 0, total: 0 });
     } finally {
       setLoading(false);
     }
@@ -123,67 +133,73 @@ const AttendanceView = () => {
         </div>
       </div>
 
-      {/* Stats Summary */}
+      {/* Stats Summary - Now shows actual data */}
       {selectedClass && (
         <div className="stats-grid" style={{ marginBottom: 'var(--space-xl)' }}>
           <div className="stat-card">
             <div className="stat-icon">✅</div>
             <div className="stat-number">{stats.present}</div>
             <div className="stat-label">Present</div>
-            <div style={{ 
-              width: '100%', 
-              height: '4px', 
-              background: 'var(--cream-dark)',
-              marginTop: 'var(--space-sm)',
-              borderRadius: '2px'
-            }}>
+            {stats.total > 0 && (
               <div style={{ 
-                width: `${stats.total ? (stats.present/stats.total)*100 : 0}%`, 
-                height: '100%', 
-                background: 'var(--success)',
+                width: '100%', 
+                height: '4px', 
+                background: 'var(--cream-dark)',
+                marginTop: 'var(--space-sm)',
                 borderRadius: '2px'
-              }} />
-            </div>
+              }}>
+                <div style={{ 
+                  width: `${(stats.present/stats.total)*100}%`, 
+                  height: '100%', 
+                  background: 'var(--success)',
+                  borderRadius: '2px'
+                }} />
+              </div>
+            )}
           </div>
 
           <div className="stat-card">
             <div className="stat-icon">⏰</div>
             <div className="stat-number">{stats.late}</div>
             <div className="stat-label">Late</div>
-            <div style={{ 
-              width: '100%', 
-              height: '4px', 
-              background: 'var(--cream-dark)',
-              marginTop: 'var(--space-sm)',
-              borderRadius: '2px'
-            }}>
+            {stats.total > 0 && (
               <div style={{ 
-                width: `${stats.total ? (stats.late/stats.total)*100 : 0}%`, 
-                height: '100%', 
-                background: 'var(--warning)',
+                width: '100%', 
+                height: '4px', 
+                background: 'var(--cream-dark)',
+                marginTop: 'var(--space-sm)',
                 borderRadius: '2px'
-              }} />
-            </div>
+              }}>
+                <div style={{ 
+                  width: `${(stats.late/stats.total)*100}%`, 
+                  height: '100%', 
+                  background: 'var(--warning)',
+                  borderRadius: '2px'
+                }} />
+              </div>
+            )}
           </div>
 
           <div className="stat-card">
             <div className="stat-icon">❌</div>
             <div className="stat-number">{stats.absent}</div>
             <div className="stat-label">Absent</div>
-            <div style={{ 
-              width: '100%', 
-              height: '4px', 
-              background: 'var(--cream-dark)',
-              marginTop: 'var(--space-sm)',
-              borderRadius: '2px'
-            }}>
+            {stats.total > 0 && (
               <div style={{ 
-                width: `${stats.total ? (stats.absent/stats.total)*100 : 0}%`, 
-                height: '100%', 
-                background: 'var(--error)',
+                width: '100%', 
+                height: '4px', 
+                background: 'var(--cream-dark)',
+                marginTop: 'var(--space-sm)',
                 borderRadius: '2px'
-              }} />
-            </div>
+              }}>
+                <div style={{ 
+                  width: `${(stats.absent/stats.total)*100}%`, 
+                  height: '100%', 
+                  background: 'var(--error)',
+                  borderRadius: '2px'
+                }} />
+              </div>
+            )}
           </div>
 
           <div className="stat-card">

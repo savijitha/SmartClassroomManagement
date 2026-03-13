@@ -12,6 +12,7 @@ class Attendance {
   }
 
   static async mark(data) {
+  try {
     // Check if attendance already marked for this student on this date
     const snapshot = await db.ref('attendance')
       .orderByChild('studentId_date')
@@ -22,8 +23,12 @@ class Attendance {
     if (existing) {
       // Update existing
       const id = Object.keys(existing)[0];
-      await db.ref(`attendance/${id}`).update(data);
-      return new Attendance({ id, ...data });
+      await db.ref(`attendance/${id}`).update({
+        status: data.status,
+        markedBy: data.markedBy,
+        markedAt: new Date().toISOString()
+      });
+      return { id, ...data };
     } else {
       // Create new
       const ref = db.ref('attendance').push();
@@ -32,12 +37,17 @@ class Attendance {
         id, 
         ...data, 
         studentId_date: `${data.studentId}_${data.date}`,
+        classId_date: `${data.classId}_${data.date}`,
         markedAt: new Date().toISOString() 
       };
       await ref.set(attendance);
-      return new Attendance(attendance);
+      return attendance;
     }
+  } catch (error) {
+    console.error('Error marking attendance:', error);
+    throw error;
   }
+}
 
   static async getByClassAndDate(classId, date) {
     const snapshot = await db.ref('attendance')

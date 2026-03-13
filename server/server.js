@@ -9,6 +9,11 @@ const classRoutes = require('./routes/classRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const assignmentRoutes = require('./routes/assignmentRoutes');
 const gradeRoutes = require('./routes/gradeRoutes');
+const scheduleRoutes = require('./routes/scheduleRoutes');
+const chatRoutes = require('./routes/chatRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+const discussionRoutes = require('./routes/discussionRoutes');
+
 
 const app = express();
 
@@ -22,7 +27,9 @@ app.use('/api/classes', classRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/assignments', assignmentRoutes);
 app.use('/api/grades', gradeRoutes);
-
+app.use('/api/chat', chatRoutes);
+app.use('/api/discussions', discussionRoutes);
+app.use('/api/notifications', notificationRoutes);
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Smart Classroom API is running' });
@@ -38,9 +45,9 @@ app.use((err, req, res, next) => {
 const userRoutes = require('./routes/userRoutes');
 app.use('/api/users', userRoutes);
 
+app.use('/api/schedules', scheduleRoutes);
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-bcrgbc uywgf

@@ -50,31 +50,40 @@ const getClassById = async (req, res) => {
 
 const enrollStudent = async (req, res) => {
   try {
-    const { studentId, email } = req.body;  // Accept both
+    const { studentId } = req.body;  // Can be sent from student dashboard
     const classData = await Class.findById(req.params.id);
 
     if (!classData) {
       return res.status(404).json({ error: 'Class not found' });
     }
 
-    if (classData.teacherId !== req.user.id) {
-      return res.status(403).json({ error: 'Not authorized to modify this class' });
+    // Allow两种情况:
+    // 1. Teacher enrolling a student (authorized)
+    // 2. Student enrolling themselves (self-enrollment)
+    const isTeacher = classData.teacherId === req.user.id;
+    const isSelfEnrollment = req.user.id === studentId && req.user.role === 'student';
+
+    if (!isTeacher && !isSelfEnrollment) {
+      return res.status(403).json({ error: 'Not authorized to enroll in this class' });
     }
 
-    let student;
-    if (studentId) {
-      // If ID is provided, find by ID
-      student = await User.findById(studentId);
-    } else if (email) {
-      // If email is provided, find by email
-      student = await User.findByEmail(email);
+    // If it's self-enrollment, studentId must be the current user
+    let targetStudentId = studentId;
+    if (isSelfEnrollment) {
+      targetStudentId = req.user.id;
     }
 
+    const student = await User.findById(targetStudentId);
     if (!student || student.role !== 'student') {
-      return res.status(400).json({ error: 'Invalid student' });
+      return res.status(400).json({ error: 'Invalid student ID' });
     }
 
-    await classData.addStudent(student.id);
+    // Check if already enrolled
+    if (classData.students && classData.students.includes(targetStudentId)) {
+      return res.status(400).json({ error: 'Student already enrolled in this class' });
+    }
+
+    await classData.addStudent(targetStudentId);
     res.json({ message: 'Student enrolled successfully' });
   } catch (error) {
     console.error('Enroll student error:', error);

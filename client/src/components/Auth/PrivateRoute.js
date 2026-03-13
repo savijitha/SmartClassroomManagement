@@ -19,11 +19,18 @@ const PrivateRoute = ({ children, allowedRoles = [] }) => {
   }
 
   if (!isAuthenticated) {
+    // Save the attempted URL for redirect after login
+    localStorage.setItem('redirectAfterLogin', window.location.pathname);
     return <Navigate to="/login" />;
   }
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
-    return <Navigate to="/dashboard" />;
+    // Redirect to appropriate dashboard based on role
+    if (user?.role === 'teacher') {
+      return <Navigate to="/dashboard" />;
+    } else {
+      return <Navigate to="/dashboard" />;
+    }
   }
 
   // If it's a function (render props pattern), call it with user
