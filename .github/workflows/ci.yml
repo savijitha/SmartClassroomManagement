@@ -19,7 +19,6 @@ jobs:
         with:
           node-version: 18
 
-      # Install Server Dependencies
       - name: Install Server Dependencies
         run: npm install
         working-directory: ./server
