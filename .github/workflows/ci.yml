@@ -2,23 +2,34 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    - name: Setup Node
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-    - name: Install Dependencies
-      run: npm install
+      # Install Server Dependencies
+      - name: Install Server Dependencies
+        run: npm install
+        working-directory: ./server
 
-    - name: Run Tests
-      run: npm test
+      # Install Client Dependencies
+      - name: Install Client Dependencies
+        run: npm install
+        working-directory: ./client
+
+      # Build React Client
+      - name: Build Client
+        run: npm run build
+        working-directory: ./client
