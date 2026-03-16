@@ -209,55 +209,57 @@ const ClassChat = ({ classId, className }) => {
               <div className="date-divider">
                 <span>{date}</span>
               </div>
-              
-              {dateMessages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`message ${message.senderId === user?.id ? 'own-message' : 'other-message'}`}
-                >
-                  {message.senderId !== user?.id && (
-                    <div className="message-sender">
-                      <span className="sender-name">{message.senderName || 'Unknown'}</span>
-                      {message.senderRole === 'teacher' && (
-                        <span className="teacher-badge">👑 Teacher</span>
-                      )}
-                    </div>
-                  )}
-                  
-                  <div className="message-content">
-                    {message.isDeleted ? (
-                      <em style={{ color: 'var(--text-light)' }}>{message.message}</em>
-                    ) : (
-                      <>
-                        {message.messageType === 'text' && (
-                          <p>{message.message}</p>
-                        )}
-                        {message.messageType === 'image' && message.fileUrl && (
-                          <img src={message.fileUrl} alt="Shared" className="chat-image" />
-                        )}
-                        {message.messageType === 'file' && message.fileUrl && (
-                          <a href={message.fileUrl} target="_blank" rel="noopener noreferrer">
-                            📎 {message.fileName || 'File'}
-                          </a>
-                        )}
-                      </>
-                    )}
-                    
-                    <div className="message-footer">
-                      <span className="message-time">{formatTime(message.timestamp)}</span>
-                      {message.senderId === user?.id && !message.isDeleted && (
-                        <button
-                          className="delete-message-btn"
-                          onClick={() => handleDeleteMessage(message.id)}
-                          title="Delete"
-                        >
-                          🗑️
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
+
+{dateMessages.map((message) => (
+  <div
+    key={message.id}
+    className={`message ${message.senderId === user?.id ? 'own-message' : 'other-message'}`}
+  >
+    {message.senderId !== user?.id && (
+      <div className="message-sender">
+        <span className="sender-name">{message.senderName || 'Unknown'}</span>
+        {message.senderRole === 'teacher' ? (
+          <span className="teacher-badge">👑 Teacher</span>
+        ) : (
+          <span className="student-badge">🎓 Student</span>
+        )}
+      </div>
+    )}
+    
+    <div className="message-content">
+      {message.isDeleted ? (
+        <em style={{ color: 'var(--text-light)' }}>{message.message}</em>
+      ) : (
+        <>
+          {message.messageType === 'text' && (
+            <p>{message.message}</p>
+          )}
+          {message.messageType === 'image' && message.fileUrl && (
+            <img src={message.fileUrl} alt="Shared" className="chat-image" />
+          )}
+          {message.messageType === 'file' && message.fileUrl && (
+            <a href={message.fileUrl} target="_blank" rel="noopener noreferrer">
+              📎 {message.fileName || 'File'}
+            </a>
+          )}
+        </>
+      )}
+      
+      <div className="message-footer">
+        <span className="message-time">{formatTime(message.timestamp)}</span>
+        {message.senderId === user?.id && !message.isDeleted && (
+          <button
+            className="delete-message-btn"
+            onClick={() => handleDeleteMessage(message.id)}
+            title="Delete"
+          >
+            🗑️
+          </button>
+        )}
+      </div>
+    </div>
+  </div>
+))}
             </div>
           ))
         ) : (
