@@ -32,3 +32,8 @@ jobs:
       - name: Build Client
         run: npm run build
         working-directory: ./client
+
+      - name: Build React app
+        run: |
+          cd client
+          CI=false npm run build
